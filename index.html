@@ -1,1 +1,55 @@
 
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>まりこ様専用 伏見リマインダー</title>
+    <style>
+        body { font-family: -apple-system, sans-serif; background: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; width: 80%; }
+        h1 { color: #333; font-size: 1.4rem; margin-bottom: 20px; }
+        #status { font-size: 1.8rem; font-weight: bold; margin: 20px 0; }
+        button { background: #007aff; color: white; border: none; padding: 12px 25px; border-radius: 10px; font-size: 1rem; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>伏見区 明日の雨予報</h1>
+        <div id="status">確認中...</div>
+        <button onclick="requestPermission()">通知を許可する</button>
+        <p style="font-size: 0.8rem; color: #888; margin-top: 20px;">※夜に自動で判定します</p>
+    </div>
+
+    <script>
+        async function checkRain() {
+            try {
+                const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=34.93&longitude=135.77&daily=weathercode&timezone=Asia%2FTokyo`);
+                const data = await res.json();
+                const tomorrowCode = data.daily.weathercode[1];
+                const rainCodes = [51, 53, 55, 61, 63, 65, 80, 81, 82];
+
+                if (rainCodes.includes(tomorrowCode)) {
+                    document.getElementById('status').innerText = "☔️ 明日は雨です";
+                    document.getElementById('status').style.color = "#007aff";
+                } else {
+                    document.getElementById('status').innerText = "☀️ 明日は雨の心配なし";
+                    document.getElementById('status').style.color = "#f4a261";
+                }
+            } catch (e) {
+                document.getElementById('status').innerText = "エラーが発生しました";
+            }
+        }
+
+        function requestPermission() {
+            Notification.requestPermission().then(permission => {
+                if (permission === "granted") {
+                    alert("通知が許可されました。");
+                    checkRain();
+                }
+            });
+        }
+        checkRain();
+    </script>
+</body>
+</html>
